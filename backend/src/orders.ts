@@ -8,7 +8,18 @@ export async function createOrder(req: Request, res: Response) {
     const cartRes = await query('SELECT * FROM carts WHERE user_id = $1', [user.id]);
     if (cartRes.rows.length === 0) return res.status(400).json({ error: 'Cart empty' });
     const cartId = cartRes.rows[0].id;
-    const itemsRes = await query('SELECT ci.quantity, p.id as product_id, p.price FROM cart_items ci JOIN products p ON p.id = ci.product_id WHERE ci.cart_id = $1', [cartId]);
+    // support selecting specific items to order (body.items = [{ product_id, quantity }])
+    const requestedItems = (req.body && Array.isArray((req.body as any).items)) ? (req.body as any).items : null;
+    let itemsRes;
+    if (requestedItems && requestedItems.length > 0) {
+      const productIds = requestedItems.map((it: any) => it.product_id);
+      itemsRes = await query(
+        'SELECT ci.id, ci.quantity, p.id as product_id, p.price FROM cart_items ci JOIN products p ON p.id = ci.product_id WHERE ci.cart_id = $1 AND p.id = ANY($2)',
+        [cartId, productIds]
+      );
+    } else {
+      itemsRes = await query('SELECT ci.id, ci.quantity, p.id as product_id, p.price FROM cart_items ci JOIN products p ON p.id = ci.product_id WHERE ci.cart_id = $1', [cartId]);
+    }
     const items = itemsRes.rows;
     if (items.length === 0) return res.status(400).json({ error: 'Cart empty' });
 
@@ -32,18 +43,17 @@ export async function createOrder(req: Request, res: Response) {
     let shipPhone = shipping_phone;
 
     if (!shipLine1) {
-      // try to read from user's profile
-      const u = await query('SELECT name, address_line1, address_line2, city, state, postal_code, country, phone FROM users WHERE id = $1', [user.id]);
-      if (u.rows.length > 0) {
-        const uu = u.rows[0];
-        shipName = shipName || uu.name;
-        shipLine1 = shipLine1 || uu.address_line1;
-        shipLine2 = shipLine2 || uu.address_line2;
-        shipCity = shipCity || uu.city;
-        shipState = shipState || uu.state;
-        shipPostal = shipPostal || uu.postal_code;
-        shipCountry = shipCountry || uu.country;
-        shipPhone = shipPhone || uu.phone;
+      // try to read from user's addresses
+      const addrRes = await query('SELECT name, address_line1, city, district, postal_code, country, phone FROM addresses WHERE user_id = $1 ORDER BY id LIMIT 1', [user.id]);
+      if (addrRes.rows.length > 0) {
+        const addr = addrRes.rows[0];
+        shipName = shipName || addr.name;
+        shipLine1 = shipLine1 || addr.address_line1;
+        shipCity = shipCity || addr.city;
+        shipState = shipState || addr.district;
+        shipPostal = shipPostal || addr.postal_code;
+        shipCountry = shipCountry || addr.country;
+        shipPhone = shipPhone || addr.phone;
       }
     }
 
@@ -58,8 +68,14 @@ export async function createOrder(req: Request, res: Response) {
       await query('INSERT INTO order_items (order_id, product_id, price, quantity) VALUES ($1, $2, $3, $4)', [orderId, it.product_id, it.price, it.quantity]);
     }
 
-    // clear cart
-    await query('DELETE FROM cart_items WHERE cart_id = $1', [cartId]);
+    // remove only ordered items from cart
+    if (requestedItems && requestedItems.length > 0) {
+      const productIds = requestedItems.map((it: any) => it.product_id);
+      await query('DELETE FROM cart_items WHERE cart_id = $1 AND product_id = ANY($2)', [cartId, productIds]);
+    } else {
+      // if no specific items requested, clear whole cart
+      await query('DELETE FROM cart_items WHERE cart_id = $1', [cartId]);
+    }
 
     res.status(201).json({ orderId });
   } catch (err) {
@@ -76,6 +92,22 @@ export async function listOrders(req: Request, res: Response) {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to list orders' });
+  }
+}
+
+export async function listAllOrders(_req: Request, res: Response) {
+  try {
+    // return all orders with basic user info for admin
+    const orders = await query(`
+      SELECT o.*, u.id as user_id, u.name as user_name, u.email as user_email
+      FROM orders o
+      LEFT JOIN users u ON u.id = o.user_id
+      ORDER BY o.created_at DESC
+    `);
+    res.json({ orders: orders.rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to list all orders' });
   }
 }
 

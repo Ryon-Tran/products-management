@@ -73,15 +73,23 @@ CREATE TABLE IF NOT EXISTS addresses (
   name TEXT,
   phone TEXT,
   address_line1 TEXT,
+  address_line2 TEXT,
   city TEXT,
+  state TEXT,
   district TEXT,
   ward TEXT,
+  postal_code TEXT,
+  country TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
 -- Thêm trường district và ward nếu chưa tồn tại
+ALTER TABLE addresses ADD COLUMN IF NOT EXISTS address_line2 TEXT;
+ALTER TABLE addresses ADD COLUMN IF NOT EXISTS postal_code TEXT;
 ALTER TABLE addresses ADD COLUMN IF NOT EXISTS district TEXT;
 ALTER TABLE addresses ADD COLUMN IF NOT EXISTS ward TEXT;
+ALTER TABLE addresses ADD COLUMN IF NOT EXISTS state TEXT;
+ALTER TABLE addresses ADD COLUMN IF NOT EXISTS country TEXT;
 
 -- Đổi kiểu id sang BIGINT nếu chưa đúng
 ALTER TABLE addresses ALTER COLUMN id TYPE BIGINT;
