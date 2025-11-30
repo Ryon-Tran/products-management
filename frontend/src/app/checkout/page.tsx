@@ -10,15 +10,16 @@ import { toast } from "sonner";
 import { useRouter } from 'next/navigation';
 
 // export const metadata = {
-//   title: "Checkout - ProductMgmt",
+//   title: "Checkout - RyonShop",
 // };
 
 export default function CheckoutPage() {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [creatingOrder, setCreatingOrder] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<string>("");
   const [selectedAddress, setSelectedAddress] = useState<any | null>(null);
   const [addingNew, setAddingNew] = useState(false);
-  const [creatingOrder, setCreatingOrder] = useState(false);
 
   useEffect(() => {
     let selectedIds: number[] = [];
@@ -49,12 +50,24 @@ export default function CheckoutPage() {
   const router = useRouter();
 
   const handleCreateOrder = async () => {
-    if (!selectedAddress || items.length === 0) return;
+    if (!selectedAddress) {
+      toast.error("Vui lòng chọn địa chỉ giao hàng!", { duration: 1500 });
+      return;
+    }
+    if (items.length === 0) {
+      toast.error("Không có sản phẩm nào để thanh toán!", { duration: 1500 });
+      return;
+    }
+    if (!paymentMethod) {
+      toast.error("Vui lòng chọn phương thức thanh toán!", { duration: 1500 });
+      return;
+    }
     setCreatingOrder(true);
     try {
       const res = await ordersApi.create({
         address_id: selectedAddress.id,
         items: items.map(it => ({ product_id: it.product_id, quantity: it.quantity })),
+        payment_method: paymentMethod,
       });
       const orderId = res?.orderId;
       toast.success("Đã tạo đơn hàng thành công!");
@@ -72,7 +85,7 @@ export default function CheckoutPage() {
       setCreatingOrder(false);
     }
   };
-  
+
   return (
         <main className="min-h-[70vh] bg-gray-50 py-8">
           <div className="max-w-5xl mx-auto px-4">
@@ -141,13 +154,26 @@ export default function CheckoutPage() {
                 <hr className="mb-3" />
                 <div className="mb-2 text-sm text-gray-500">Phí vận chuyển và thuế sẽ được tính ở bước tiếp theo.</div>
                 <hr className="mb-3" />
+                <div className="mb-4">
+                  <label className="block mb-2 text-sm font-medium text-gray-700">Phương thức thanh toán</label>
+                  <select
+                    className="w-full rounded border p-2 text-gray-700 bg-white"
+                    value={paymentMethod}
+                    onChange={e => setPaymentMethod(e.target.value)}
+                  >
+                    <option value="">-- Chọn phương thức --</option>
+                    <option value="cod">Thanh toán khi nhận hàng (COD)</option>
+                    <option value="bank">Chuyển khoản ngân hàng</option>
+                    <option value="momo">Ví MoMo</option>
+                  </select>
+                </div>
                 <div className="flex justify-between items-center mb-4 text-lg font-bold text-gray-900">
                   <span>Tổng:</span>
                   <span>{subtotal.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}</span>
                 </div>
                 <button
-                  className={`w-full rounded-lg bg-gray-900 px-4 py-2 text-white font-semibold hover:bg-gray-800 transition ${items.length === 0 || !selectedAddress ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : ''}`}
-                  disabled={items.length === 0 || !selectedAddress || creatingOrder}
+                  className={`w-full rounded-lg bg-gray-900 px-4 py-2 text-white font-semibold hover:bg-gray-800 transition ${items.length === 0 || creatingOrder ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : ''}`}
+                  disabled={items.length === 0 || creatingOrder}
                   onClick={handleCreateOrder}
                 >
                   {creatingOrder ? "Đang tạo đơn hàng..." : "Thanh toán"}
@@ -157,4 +183,4 @@ export default function CheckoutPage() {
           </div>
         </main>
       );
-    }
+}

@@ -67,7 +67,7 @@ export default function AdminSidebar() {
             <div className="flex items-center gap-3 px-4 py-5">
                 <div className="h-10 w-10 rounded-md bg-[color:var(--color-primary)] flex items-center justify-center text-white font-bold">PM</div>
                 <div>
-                    <div className="text-sm font-semibold">ProductMgmt</div>
+                    <div className="text-sm font-semibold">RyonShop</div>
                     <div className="text-xs text-[color:var(--color-muted)]">Admin Panel</div>
                 </div>
             </div>
@@ -84,10 +84,7 @@ export default function AdminSidebar() {
                     </Link>
                     <Link href="/admin/orders" className={`${baseLink} ${hover} ${isActive('/admin/orders') ? activeLeft : 'text-[color:var(--color-text)]'}`}>
                         <List size={16} /> Orders
-                    </Link>
-                    <Link href="/admin/categories" className={`${baseLink} ${hover} ${isActive('/admin/categories') ? activeLeft : 'text-[color:var(--color-text)]'}`}>
-                        <Tag size={16} /> Categories
-                    </Link>
+                    </Link>                   
                     <Link href="/admin/customers" className={`${baseLink} ${hover} ${isActive('/admin/customers') ? activeLeft : 'text-[color:var(--color-text)]'}`}>
                         <Users size={16} /> Customers
                     </Link>

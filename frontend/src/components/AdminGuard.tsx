@@ -10,8 +10,8 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     const role = getUserRole();
-    if (!role) {
-      router.replace("/login");
+    if (role !== "admin") {
+      router.replace("/404");
     } else {
       setChecked(true);
     }

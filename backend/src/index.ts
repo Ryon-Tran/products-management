@@ -21,18 +21,8 @@ const app = express();
 app.use(helmet());
 
 // CORS: allow origins from env or allow all in development
-const isDev = process.env.NODE_ENV !== 'production';
-const allowed = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['http://localhost:3000', 'http://127.0.0.1:3000'];
-if (isDev) {
-  // allow any origin in development (including curl / Postman with no Origin)
-  app.use(cors());
-} else {
-  app.use(cors({ origin: (origin, cb) => {
-    if (!origin) return cb(null, true); // allow server-to-server or curl
-    if (allowed.indexOf(origin) !== -1) return cb(null, true);
-    return cb(new Error('CORS not allowed'));
-  }}));
-}
+// Cho phép tất cả origin (universal CORS)
+app.use(cors());
 
 // Rate limiter
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 200 });

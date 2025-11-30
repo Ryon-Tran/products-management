@@ -79,18 +79,19 @@ function ShopPage() {
     <div className="min-h-[70vh] bg-[color:var(--color-bg)] py-8">
       <div className="site-container">
 
-        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="mb-8 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-[color:var(--color-text)]">Shop</h1>
+            <h1 className="text-2xl font-bold text-[color:var(--color-text)]">TÌm kiếm sản phẩm</h1>
             {q ? <p className="text-sm text-slate-600">Kết quả tìm kiếm cho "{q}"</p> : null}
+            <p className="text-xs text-gray-500 mt-1">{loading ? "Đang tải..." : `${products.length} sản phẩm tìm thấy`}</p>
           </div>
 
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center bg-white rounded-md shadow px-4 py-3 border">
+            <div className="flex flex-wrap items-center gap-2">
               <select
                 value={category ?? ''}
                 onChange={(e) => setCategory(e.target.value || undefined)}
-                className="rounded border p-2"
+                className="rounded border-2 border-gray-200 p-2 focus:border-[color:var(--color-primary)]"
               >
                 <option value="">Tất cả danh mục</option>
                 {categories.map((c: any) => (
@@ -98,19 +99,18 @@ function ShopPage() {
                 ))}
               </select>
 
-              <input type="number" placeholder="Giá thấp" value={minPrice ?? ''} onChange={(e) => setMinPrice(e.target.value || undefined)} className="w-24 rounded border p-2" />
-              <input type="number" placeholder="Giá cao" value={maxPrice ?? ''} onChange={(e) => setMaxPrice(e.target.value || undefined)} className="w-24 rounded border p-2" />
+              <input type="number" placeholder="Giá thấp" value={minPrice ?? ''} onChange={(e) => setMinPrice(e.target.value || undefined)} className="w-24 rounded border-2 border-gray-200 p-2 focus:border-[color:var(--color-primary)]" />
+              <input type="number" placeholder="Giá cao" value={maxPrice ?? ''} onChange={(e) => setMaxPrice(e.target.value || undefined)} className="w-24 rounded border-2 border-gray-200 p-2 focus:border-[color:var(--color-primary)]" />
 
-              <select value={sort ?? ''} onChange={(e) => setSort(e.target.value || undefined)} className="rounded border p-2">
+              <select value={sort ?? ''} onChange={(e) => setSort(e.target.value || undefined)} className="rounded border-2 border-gray-200 p-2 focus:border-[color:var(--color-primary)]">
                 <option value="">Mặc định</option>
                 <option value="price_asc">Giá: Tăng dần</option>
                 <option value="price_desc">Giá: Giảm dần</option>
               </select>
             </div>
 
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2 mt-2 sm:mt-0">
               <Button onClick={() => {
-                // push filters into url querystring
                 const params = new URLSearchParams();
                 if (q) params.set('search', q);
                 if (category) params.set('category', String(category));
@@ -119,19 +119,19 @@ function ShopPage() {
                 if (sort) params.set('sort', String(sort));
                 const url = `/shop${params.toString() ? `?${params.toString()}` : ''}`;
                 router.push(url);
-              }}>Áp dụng</Button>
+              }} className="rounded px-4">Áp dụng</Button>
               <Button variant="ghost" onClick={() => {
                 setCategory(undefined); setMinPrice(undefined); setMaxPrice(undefined); setSort(undefined);
                 const params = new URLSearchParams();
                 if (q) params.set('search', q);
                 const url = `/shop${params.toString() ? `?${params.toString()}` : ''}`;
                 router.push(url);
-              }}>Xóa</Button>
-            </div>
+              }} className="rounded px-4">Xóa</Button>
+            </div> */}
           </div>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {loading ? (
             <ProductSkeleton count={8} />
           ) : products.length ? (
@@ -141,14 +141,16 @@ function ShopPage() {
                 product={{
                   id: p.id,
                   title: p.title || p.name,
-                  price: typeof p.price === "number" ? `$${p.price.toFixed(2)}` : p.price || "$0.00",
+                  price: typeof p.price === "number" ? p.price : Number(p.price) || 0,
                   image: p.image || p.image_url || "/images/placeholder.png",
                 }}
               />
             ))
           ) : (
-            <div className="col-span-full rounded-lg bg-white p-6 text-center shadow">
-              <p className="mb-3 text-lg text-slate-700">Không tìm thấy sản phẩm.</p>
+            <div className="col-span-full rounded-md bg-white p-8 text-center shadow flex flex-col items-center">
+              <img src="/images/no-results.svg" alt="Không tìm thấy" className="w-32 h-32 mb-4 opacity-70" />
+              <p className="mb-2 text-lg text-slate-700">Không tìm thấy sản phẩm.</p>
+              <p className="text-sm text-gray-400">Thử từ khóa khác hoặc điều chỉnh bộ lọc.</p>
             </div>
           )}
         </div>

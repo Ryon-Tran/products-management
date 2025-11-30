@@ -4,27 +4,69 @@ import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-export default function AddressForm({
-  initial,
-  onSave,
-  onCancel,
-}: {
+interface AddressFormProps {
   initial?: any;
   onSave: (addr: any) => void;
   onCancel?: () => void;
-}) {
+}
+
+export default function AddressForm({ initial, onSave, onCancel }: AddressFormProps) {
   const [label, setLabel] = useState(initial?.label || "Nhà riêng");
   const [name, setName] = useState(initial?.name || "");
   const [phone, setPhone] = useState(initial?.phone || "");
-  const [address1, setAddress1] = useState(initial?.address1 || "");
-  // Removed address2
+  const [street, setStreet] = useState(initial?.street || "");
   const [city, setCity] = useState(initial?.city || "");
+  const [state, setState] = useState(initial?.state || initial?.province || "");
   const [district, setDistrict] = useState(initial?.district || "");
   const [ward, setWard] = useState(initial?.ward || "");
   const [provinces, setProvinces] = useState<any[]>([]);
   const [districts, setDistricts] = useState<any[]>([]);
   const [wards, setWards] = useState<any[]>([]);
+  // Đảm bảo set lại district khi danh sách districts đã load (chỉ set một lần khi sửa)
+  useEffect(() => {
+    if (initial?.district && districts.length > 0) {
+      setDistrict(initial.district);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [districts]);
 
+  // Đảm bảo set lại ward khi danh sách wards đã load (chỉ set một lần khi sửa)
+  useEffect(() => {
+    if (initial?.ward && wards.length > 0) {
+      setWard(initial.ward);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wards]);
+
+  // Khi initial thay đổi, tự động load lại danh sách quận/huyện/phường nếu có city/district ban đầu
+  useEffect(() => {
+    if (initial?.city) {
+      // Tìm mã tỉnh/thành phố
+      fetch("https://provinces.open-api.vn/api/p/")
+        .then(res => res.json())
+        .then(data => {
+          setProvinces(data);
+          const selectedProvince = data.find((p: any) => p.name === initial.city);
+          if (selectedProvince) {
+            fetch(`https://provinces.open-api.vn/api/p/${selectedProvince.code}?depth=2`)
+              .then(res => res.json())
+              .then(data2 => {
+                setDistricts(data2.districts || []);
+                if (initial.district) {
+                  const selectedDistrict = (data2.districts || []).find((d: any) => d.name === initial.district);
+                  if (selectedDistrict) {
+                    fetch(`https://provinces.open-api.vn/api/d/${selectedDistrict.code}?depth=2`)
+                      .then(res => res.json())
+                      .then(data3 => {
+                        setWards(data3.wards || []);
+                      });
+                  }
+                }
+              });
+          }
+        });
+    }
+  }, [initial]);
   useEffect(() => {
     fetch("https://provinces.open-api.vn/api/p/")
       .then(res => res.json())
@@ -74,7 +116,7 @@ export default function AddressForm({
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim() || !address1.trim() || !city || !district || !ward) {
+    if (!name.trim() || !street.trim() || !city || !district || !ward) {
       alert("Vui lòng điền đầy đủ thông tin địa chỉ.");
       return;
     }
@@ -82,8 +124,9 @@ export default function AddressForm({
       label,
       name,
       phone,
-      address1,
+      street,
       city,
+      state: state || city,
       district,
       ward,
     };
@@ -156,8 +199,10 @@ export default function AddressForm({
 
       <div>
         <label className="mb-1 block text-sm font-semibold text-gray-700">Địa chỉ</label>
-        <Input value={address1} onChange={(e) => setAddress1(e.target.value)} className="bg-gray-50 focus:bg-white border-gray-200 focus:border-primary rounded-lg" />
+        <Input value={street} onChange={(e) => setStreet(e.target.value)} className="bg-gray-50 focus:bg-white border-gray-200 focus:border-primary rounded-lg" />
       </div>
+
+      {/* address_line2 is derived from the selected ward/district/city */}
 
       <div className="flex items-center justify-center gap-3 mt-4">
         <Button type="submit" className="px-6 py-2 rounded-lg font-semibold text-white bg-primary hover:bg-primary/90 shadow">Lưu</Button>

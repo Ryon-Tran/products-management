@@ -1,5 +1,22 @@
 import { Request, Response } from 'express';
 import { query } from './db';
+// Cập nhật trạng thái đơn hàng (admin)
+
+export async function updateOrderStatus(req: Request, res: Response) {
+  try {
+    const orderId = req.params.id;
+    const { status } = req.body;
+    if (!['pending', 'paid', 'cancelled'].includes(status)) {
+      return res.status(400).json({ error: 'Trạng thái không hợp lệ' });
+    }
+    const result = await query('UPDATE orders SET status = $1 WHERE id = $2 RETURNING *', [status, orderId]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Order not found' });
+    res.json({ order: result.rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update order status' });
+  }
+}
 
 export async function createOrder(req: Request, res: Response) {
   try {
@@ -31,35 +48,32 @@ export async function createOrder(req: Request, res: Response) {
 
     // create order
     // accept optional shipping info in body; fall back to user's saved address
-    const { shipping_name, shipping_address_line1, shipping_address_line2, shipping_city, shipping_state, shipping_postal_code, shipping_country, shipping_phone } = req.body;
+    const { shipping_name, shipping_city, shipping_state, shipping_phone, shipping_street, shipping_ward } = req.body;
 
     let shipName = shipping_name;
-    let shipLine1 = shipping_address_line1;
-    let shipLine2 = shipping_address_line2;
     let shipCity = shipping_city;
     let shipState = shipping_state;
-    let shipPostal = shipping_postal_code;
-    let shipCountry = shipping_country;
     let shipPhone = shipping_phone;
+    let shipStreet = shipping_street;
+    let shipWard = shipping_ward;
 
-    if (!shipLine1) {
+    if (!shipStreet) {
       // try to read from user's addresses
-      const addrRes = await query('SELECT name, address_line1, city, district, postal_code, country, phone FROM addresses WHERE user_id = $1 ORDER BY id LIMIT 1', [user.id]);
+      const addrRes = await query('SELECT name, city, state, ward, phone, street FROM addresses WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1', [user.id]);
       if (addrRes.rows.length > 0) {
         const addr = addrRes.rows[0];
         shipName = shipName || addr.name;
-        shipLine1 = shipLine1 || addr.address_line1;
         shipCity = shipCity || addr.city;
-        shipState = shipState || addr.district;
-        shipPostal = shipPostal || addr.postal_code;
-        shipCountry = shipCountry || addr.country;
+        shipState = shipState || addr.state;
         shipPhone = shipPhone || addr.phone;
+        shipStreet = shipStreet || addr.street;
+        shipWard = shipWard || addr.ward;
       }
     }
 
     const ord = await query(
-      'INSERT INTO orders (user_id, total, status, shipping_name, shipping_address_line1, shipping_address_line2, shipping_city, shipping_state, shipping_postal_code, shipping_country, shipping_phone) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *',
-      [user.id, total, 'placed', shipName || null, shipLine1 || null, shipLine2 || null, shipCity || null, shipState || null, shipPostal || null, shipCountry || null, shipPhone || null]
+      'INSERT INTO orders (user_id, total, status, shipping_name, shipping_city, shipping_state, shipping_phone, shipping_street, shipping_ward) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *',
+      [user.id, total, 'pending', shipName || null, shipCity || null, shipState || null, shipPhone || null, shipStreet || null, shipWard || null]
     );
     const orderId = ord.rows[0].id;
 

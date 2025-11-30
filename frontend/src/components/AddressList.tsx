@@ -79,7 +79,7 @@ export default function AddressList({ onSelect }: { onSelect?: (addr: any) => vo
                 <div className="flex-1">
                   <div className="font-semibold text-gray-800 text-base">{a.label}</div>
                   <div className="text-xs text-gray-700 font-medium">{a.name} <span className="text-gray-400">— {a.phone}</span></div>
-                  <div className="text-xs text-gray-500">{a.address1}{a.ward ? ", " + a.ward : ""}{a.district ? ", " + a.district : ""}{a.city ? ", " + a.city : ""}</div>
+                  <div className="text-xs text-gray-500">{a.street}{a.ward ? ", " + a.ward : ""}{a.district ? ", " + a.district : ""}{a.city ? ", " + a.city : ""}</div>
                 </div>
                 <div className="flex gap-1">
                   <Button onClick={e => { e.stopPropagation(); setEditing(a); }} size="sm" variant="outline" className="rounded px-2 py-1 text-xs">Sửa</Button>

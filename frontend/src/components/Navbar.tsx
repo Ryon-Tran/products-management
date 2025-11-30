@@ -119,9 +119,9 @@ export default function Navbar() {
       <div className="site-container flex items-center justify-between gap-4 py-4">
         <div className="flex items-center gap-4">
           <Link href="/" className="flex items-center gap-3">
-            <div className="rounded-md bg-[color:var(--color-primary)] p-2 text-white">PM</div>
+            <div className="rounded-md bg-[color:var(--color-primary)] p-2 text-white">R</div>
             <div className="flex flex-col leading-tight">
-              <span className="font-semibold text-[color:var(--color-text)]">ProductMgmt</span>
+              <span className="font-semibold text-[color:var(--color-text)]">RyonShop</span>
               <small className="text-xs text-[color:var(--color-muted)]">Curated home goods</small>
             </div>
           </Link>

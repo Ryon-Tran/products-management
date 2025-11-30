@@ -1,8 +1,10 @@
 import { Router } from 'express';
 import { authMiddleware, adminMiddleware } from '../auth';
-import { createOrder, listOrders, getOrder, listAllOrders } from '../orders';
 
+import { createOrder, listOrders, getOrder, listAllOrders, updateOrderStatus } from '../orders';
 const router = Router();
+// Admin cập nhật trạng thái đơn hàng
+router.put('/admin/:id/status', authMiddleware, adminMiddleware, updateOrderStatus);
 
 router.post('/', authMiddleware, createOrder);
 router.get('/', authMiddleware, listOrders);
