@@ -1,0 +1,55 @@
+# Node
+/backend/node_modules/
+/frontend/node_modules/
+
+# Build
+/backend/.next/
+/frontend/.next/
+
+# Logs
+/backend/npm-debug.log*
+/backend/yarn-debug.log*
+/backend/yarn-error.log*
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+
+# Env
+/backend/.env
+/frontend/.env
+
+# OS
+/backend/.DS_Store
+/backend/Thumbs.db
+/frontend/.DS_Store
+/frontend/Thumbs.db
+
+# VSCode
+/backend/.vscode/
+/frontend/.vscode/
+
+# Others
+/backend/*.swp
+/backend/*.swo
+/frontend/*.swp
+/frontend/*.swo
+
+# Output
+/backend/out/
+/frontend/out/
+
+# Coverage
+/backend/coverage/
+/frontend/coverage/
+
+# Misc
+/backend/*.log
+/frontend/*.log
+
+# Ignore local config
+/backend/*.local.js
+/backend/*.local.ts
+/backend/*.local.json
+/frontend/*.local.js
+/frontend/*.local.ts
+/frontend/*.local.json
