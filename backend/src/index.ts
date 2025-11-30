@@ -31,7 +31,7 @@ app.use(limiter);
 app.use(express.json());
 
 // Swagger UI
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(openapiSpec));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openapiSpec));
 app.get('/openapi.json', (_req: Request, res: Response) => res.json(openapiSpec));
 
 // Centralized error handler

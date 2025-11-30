@@ -22,21 +22,8 @@ const app = (0, express_1.default)();
 // Security middlewares
 app.use((0, helmet_1.default)());
 // CORS: allow origins from env or allow all in development
-const isDev = process.env.NODE_ENV !== 'production';
-const allowed = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['http://localhost:3000', 'http://127.0.0.1:3000'];
-if (isDev) {
-    // allow any origin in development (including curl / Postman with no Origin)
-    app.use((0, cors_1.default)());
-}
-else {
-    app.use((0, cors_1.default)({ origin: (origin, cb) => {
-            if (!origin)
-                return cb(null, true); // allow server-to-server or curl
-            if (allowed.indexOf(origin) !== -1)
-                return cb(null, true);
-            return cb(new Error('CORS not allowed'));
-        } }));
-}
+// Cho phép tất cả origin (universal CORS)
+app.use((0, cors_1.default)());
 // Rate limiter
 const limiter = (0, express_rate_limit_1.default)({ windowMs: 15 * 60 * 1000, max: 200 });
 app.use(limiter);
