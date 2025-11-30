@@ -1,7 +1,7 @@
 "use client";
 import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { list as fetchProducts } from "@/lib/api/products";
 import { list as fetchCategories } from "@/lib/api/categories";
@@ -20,7 +20,7 @@ function ProductSkeleton({ count = 8 }: { count?: number }) {
   );
 }
 
-export default function ShopPage() {
+function ShopPage() {
   const searchParams = useSearchParams();
   const q = searchParams?.get("search") || "";
   const initialCategory = searchParams?.get('category') || '';
@@ -154,5 +154,13 @@ export default function ShopPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ShopPageWithSuspense() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ShopPage />
+    </Suspense>
   );
 }
