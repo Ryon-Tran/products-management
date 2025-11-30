@@ -4,7 +4,26 @@ const db = require('./db');
 require('dotenv').config();
 
 const app = express();
-app.use(cors());
+const allowedOrigin = 'https://products-management-6fd3ex1at-dole-its-projects.vercel.app'; // domain frontend của bạn
+
+const corsOptions = {
+  origin: function(origin, callback) {
+    // allow requests with no origin (like curl, Postman)
+    if (!origin) return callback(null, true);
+    if (origin === allowedOrigin) return callback(null, true);
+    return callback(new Error('Not allowed by CORS'));
+  },
+  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  credentials: true // nếu bạn dùng cookie/session; nếu không dùng thì có thể set false
+};
+
+// Apply CORS middleware for all routes
+app.use(cors(corsOptions));
+
+// Ensure preflight requests are handled
+app.options('*', cors(corsOptions));
+
 app.use(express.json());
 
 // Create product
