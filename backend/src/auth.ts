@@ -11,12 +11,10 @@ export async function register(req: Request, res: Response) {
     if (!name || !email || !password) return res.status(400).json({ error: 'Thiếu trường bắt buộc' });
     if (typeof email !== 'string' || !email.includes('@')) return res.status(400).json({ error: 'Email không hợp lệ' });
     if (typeof password !== 'string' || password.length < 6) return res.status(400).json({ error: 'Mật khẩu quá ngắn (tối thiểu 6 ký tự)' });
-    // accept optional address fields
-    const { address_line1, address_line2, city, state, postal_code, country, phone } = req.body;
     const hash = await bcrypt.hash(password, 10);
     const result = await query(
-      'INSERT INTO users (name, email, password_hash, address_line1, address_line2, city, state, postal_code, country, phone) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id, name, email, created_at',
-      [name, email, hash, address_line1 || null, address_line2 || null, city || null, state || null, postal_code || null, country || null, phone || null]
+      'INSERT INTO users (name, email, password_hash) VALUES ($1,$2,$3) RETURNING id, name, email, created_at',
+      [name, email, hash]
     );
     res.status(201).json(result.rows[0]);
   } catch (err: any) {
