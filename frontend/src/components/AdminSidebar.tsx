@@ -67,7 +67,7 @@ export default function AdminSidebar() {
             <div className="flex items-center gap-3 px-4 py-5">
                 <div className="h-10 w-10 rounded-md bg-[color:var(--color-primary)] flex items-center justify-center text-white font-bold">PM</div>
                 <div>
-                    <div className="text-sm font-semibold">RyonShop</div>
+                    <div className="text-sm font-semibold">SHOPĐÔMINI</div>
                     <div className="text-xs text-[color:var(--color-muted)]">Admin Panel</div>
                 </div>
             </div>
