@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="mx-auto max-w-6xl">
         <div className="grid gap-6 sm:grid-cols-3">
           <div>
-            <h4 className="mb-2 text-lg font-semibold">RyonShop</h4>
+            <h4 className="mb-2 text-lg font-semibold">SHOPĐÔMINI</h4>
             <p className="text-sm text-[color:var(--color-muted)]">Modern ecommerce demo — curated home goods.</p>
           </div>
 
@@ -28,7 +28,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-8 border-t pt-6 text-center text-sm text-[color:var(--color-muted)]">© {new Date().getFullYear()} RyonShop. All rights reserved.</div>
+        <div className="mt-8 border-t pt-6 text-center text-sm text-[color:var(--color-muted)]">© {new Date().getFullYear()} SHOPĐÔMINI. All rights reserved.</div>
       </div>
     </footer>
   );

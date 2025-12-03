@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { useRouter } from 'next/navigation';
 
 // export const metadata = {
-//   title: "Checkout - RyonShop",
+//   title: "Checkout - SHOPĐÔMINI",
 // };
 
 export default function CheckoutPage() {
